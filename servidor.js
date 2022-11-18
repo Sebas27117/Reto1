@@ -2,7 +2,7 @@
 
 const express = require('express');
 const mongoose = require('mongoose');
-const TareaSchema = require('./modelos/Tarea.js');
+const InscripcionSchema = require('./modelos/Inscripcion.js');
 
 const app = express();
 const router= express.Router();
@@ -18,30 +18,46 @@ router.get('/', (req , res) => {
     res.send("El inicio de mi API.");
 })
 
-router.get('/tarea', (req , res) => {
-    TareaSchema.find(function(err, datos){
+router.get('/inscripcion', (req , res) => {
+    InscripcionSchema.find(function(err, datos){
         if(err){
             console.log("Error leyendo la tarea")
         }
         else{
             res.send(datos);
         }
-    })
+    }) 
 });
 
-router.post('/tarea', (req, res) => {
-    let nuevaTarea = new TareaSchema({
-        idTarea: req.body.id,
-        nombreTarea: req.body.nombre,
-        detalleTarea: req.body.detalle
-    });
+router.post('/inscripcion', (req, res) => {
+    const nuevoRegistro = InscripcionSchema(req.body);
+    nuevoRegistro
+    .save()
+    .then((data)=> res.json(data))
+    .catch((error)=> res.json({message: error}))
+});
 
-    nuevaTarea.save(function(err,datos){
-        if(err){
-            console.log(err);
-        }
-        res.send("Tarea almacenada correctamente.");
-    });
+router.put('/inscripcion/:id', (req,res) => {
+    const {id}=req.params;
+    const {idInscricion,TipoDocumento,NumeroDocumento,Nombres,Apellidos,Direccion,Correo,
+    Telefono,Celular,Link_pago,Codigo_ICFES,EstudiaFamiliar,EstratoSocial,Tipo_Colegio} =req.body;
+    InscripcionSchema
+    .updateOne({_id:id}, {$set: {idInscricion,TipoDocumento,NumeroDocumento,Nombres,Apellidos,Direccion,Correo,
+        Telefono,Celular,Link_pago,Codigo_ICFES,EstudiaFamiliar,EstratoSocial,Tipo_Colegio}})
+    .then((data)=> res.json(data))
+    .catch((error)=> res.json({message: error}))
+});
+
+router.delete('/inscripcion/:id', (req,res) => {
+    const {id}=req.params;
+    InscripcionSchema
+    .remove({_id:id})
+    .then((data)=> res.json(data))
+    .catch((error)=> res.json({message: error}))
+});
+
+router.delete('/inscripcion', (req,res) => {
+    res.send("En metodo delete");
 });
 
 app.use(router);
